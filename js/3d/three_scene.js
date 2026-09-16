@@ -36,21 +36,32 @@ class Arena3DScene {
     this.camera = new THREE.PerspectiveCamera(65, aspect, 0.1, 1000);
     this.camera.position.set(0, 16, 28);
 
-    // 4. Create WebGL Renderer with Anti-aliasing & High Performance
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: false });
-    this.renderer.setClearColor(0x0b132b, 1);
-    this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // 4. Create WebGL Renderer with Anti-aliasing & High Performance (Safe Fallback)
+    try {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: false });
+    } catch (e) {
+      try {
+        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+      } catch (err2) {
+        console.warn("WebGL renderer unavailable:", err2);
+      }
+    }
 
-    // Clear old canvases and append
-    this.container.innerHTML = "";
-    this.container.appendChild(this.renderer.domElement);
-    this.renderer.domElement.id = "battleCanvas3D";
-    this.renderer.domElement.style.width = "100%";
-    this.renderer.domElement.style.height = "100%";
-    this.renderer.domElement.style.display = "block";
+    if (this.renderer) {
+      this.renderer.setClearColor(0x0b132b, 1);
+      this.renderer.setSize(width, height);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Clear old canvases and append
+      this.container.innerHTML = "";
+      this.container.appendChild(this.renderer.domElement);
+      this.renderer.domElement.id = "battleCanvas3D";
+      this.renderer.domElement.style.width = "100%";
+      this.renderer.domElement.style.height = "100%";
+      this.renderer.domElement.style.display = "block";
+    }
 
     // 5. Setup Rich Lighting
     this.setupLighting();

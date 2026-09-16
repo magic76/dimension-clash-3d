@@ -28,15 +28,23 @@ class App3D {
   init() {
     const container = document.getElementById("battle3DContainer");
     if (container) {
-      this.sceneManager = new Arena3DScene(container);
-      this.sceneManager.init();
+      try {
+        this.sceneManager = new Arena3DScene(container);
+        this.sceneManager.init();
 
-      this.cameraController = new CameraController3D(
-        this.sceneManager.camera,
-        this.sceneManager.renderer.domElement
-      );
+        if (this.sceneManager.renderer && this.sceneManager.renderer.domElement) {
+          this.cameraController = new CameraController3D(
+            this.sceneManager.camera,
+            this.sceneManager.renderer.domElement
+          );
+        }
 
-      window.matchEngine3D.init(this.sceneManager.scene);
+        if (window.matchEngine3D && this.sceneManager.scene) {
+          window.matchEngine3D.init(this.sceneManager.scene);
+        }
+      } catch (err) {
+        console.error("Notice: 3D scene initialization error, fallback to safe UI state:", err);
+      }
     }
 
     // 初始化 P2P 聯機庫
